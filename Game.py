@@ -50,7 +50,7 @@ class Ray:
         lenX = W * math.cos(self.angle) / 100 #Parts of rayX (1/100) Части лучаХ (поделили его на 100 маленьких частей)  player.posX +
         lenY = W * math.sin(self.angle) / 100 #Parts of rayY (1/100) player.posY +
 
-        for i in range(1,200): # Founding the point by multiplying it on i
+        for i in range(1,100): # Founding the point by multiplying it on i
             if (len(map.map) > (player.posY + lenY * i )// 100 >= 0 and len(map.map[0]) > (player.posX + lenX * i) // 100 >= 0): # can check next string?
                 if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block:
                     return (player.posX + lenX * i, player.posY + lenY* i) # return point
@@ -61,8 +61,6 @@ class Ray:
         return (x - player.posX,y - player.posY)
 
 
-
-"""
 class Bullet:
     def __init__(self):
         self.angle = player.angle
@@ -75,18 +73,27 @@ class Bullet:
     def draw(self):
         if (W > self.curX > 0) and (H > self.curY > 0):
             pygame.draw.circle(screen,'white',self.nextPos(),3)
-"""
+
 
 class Map:
     def __init__(self):
         self.map = [
-            [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
-            [1,'_','_','_','_','_','_','_','_', 1],
+            [1, 1,  1,  1,  1,  1,    1,    1,  1,  1],
+            [1,'pl','_','_','_','_',  '_', '_','_', 1],
+            [1,'_','_','_','_','_',   '_', '_','_',1],
+            [1,'_','_','_', 1,  1,    '_', '_','_',1],
+            [1,'_','_','_', 1,  1,    '_', '_','_',1],
+            [1,'_','_','_','_', '_',  '_', 1,'_',1],
+            [1,'_' ,'_', '_','_', '_','_', 1,'_',1],
+            [1,'_' ,'_', '_','_','_','_', 1,'_',1],
+            [1, 1,  1,  1,'_','_', '_',  1,  1, 1],
             [1,'_','_','_','_','_', '_','_','_',1],
-            [1,'_','_','_', 1,  1,  '_','_','_',1],
-            [1,'_','_','_', 1,  1,  '_','_','_',1],
-            [1,'_','_','_','_', '_','_', 1, '_',1],
-            [1, 1 ,'_', '_','_', '_','_', 1, '_',1],
+            [1,'_','_','_',1,'_', '_',  '_','_',1],
+            [1,'_', 1,  1, 1,  1,  1,   '_','_',1],
+            [1,'_','_','_',1, '_', 1,   '_','_',1],
+            [1,'_','_','_',1, '_', '_', '_','_',1],
+            [1,'_', 1 ,'_','_','_', '_', 1,  1,1],
+            [1,'_','_','_','_','_', '_', '_','_',1],
             [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
         ]
 
@@ -96,8 +103,17 @@ class Map:
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
             [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     '_',     '_',     '_',     blue,    '_',    orange],
-            [orange, orange ,'_',      '_',     '_',     '_',     '_',     blue,    '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
+            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
+            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
+            [orange, orange,orange,  orange,     '_',     '_',     '_',     green,  green,    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',    orange,     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   orange,   orange,   orange,     green,   green,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,     '_',     green,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   orange,      '_',     '_',     '_',     '_',     orange,     orange,    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [white, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
         ]
 
@@ -136,7 +152,7 @@ class Player:
         self.posX = 150
         self.posY = 150
         self.angle = 0
-        self.speed = 0.25
+        self.speed = 0.5
         self.cameraSens = 0.005
 
     def movement(self):
@@ -184,6 +200,7 @@ def DrawBullets():
     for i in range(len(bullets)):
         bullets[i].draw()
 """
+
 def TwoD():
     map.draw()
     player.draw()
