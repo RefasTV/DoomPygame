@@ -115,6 +115,8 @@ class Player:
 
     def movement(self):
         keys = pygame.key.get_pressed()
+        prevX = self.posX
+        prevY = self.posY
         if (keys[pygame.K_s]):
             self.posX += -self.speed * math.cos(self.angle)
             self.posY += -self.speed * math.sin(self.angle)
@@ -127,6 +129,12 @@ class Player:
         if (keys[pygame.K_d]):
             self.posX += -self.speed * math.sin(self.angle) 
             self.posY += self.speed * math.cos(self.angle)
+
+        if (map.map[int(self.posY // 100)] [int(self.posX // 100)] == 1):
+            self.posX = prevX
+            self.posY = prevY
+
+
 
         if (keys[pygame.K_LEFT]):
             self.angle -= self.cameraSens
