@@ -115,12 +115,19 @@ class Map:
             proj_h = proj_coff / depth
             depth *= math.cos(player.angle - rays[curRay].angle)
             c1,c2,c3 = self.colorMap[int(GHPy//100)][int(GHPx//100)]
-            cDepth = depth
-            if (cDepth < 0):
-                cDepth = 0
-            elif cDepth > 255:
-                cDepth = 255
-            pygame.draw.rect(screen, [c1, c2, c3],   # Do depth
+            if (c1 - depth*3 < 0):
+                c1 = 0
+            else:
+                c1 -= depth * 3
+            if (c2 - depth * 3< 0):
+                c2 = 0
+            else:
+                c2 -= depth * 3
+            if (c3 - depth * 3< 0):
+                c3 = 0
+            else:
+                c3 -= depth * 3
+            pygame.draw.rect(screen, [c1, c2, c3],
                             (scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
 
 
