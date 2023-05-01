@@ -5,7 +5,7 @@ import pygame, math
 orange = (255,171,0)
 blue = (0,255,255)
 green = (0,255,128)
-white = (0,0,0)
+white = (255,255,255)
 
 ########Variables############
 H = 1000 #Ширина
@@ -110,11 +110,11 @@ class Map:
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   '_',      '_',    orange,     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   orange,   orange,   orange,     green,   green,     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,     '_',     green,     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     orange,     '_',     green,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     orange,     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   orange,      '_',     '_',     '_',     '_',     orange,     orange,    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
-            [white, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
+            [orange, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
         ]
 
     def draw(self): # Draw 2D
@@ -218,6 +218,7 @@ def TwoD():
 
 def ThreeD():
     map.newDraw()
+    map.MiniMap()
 
 
 ##########Class Objects##########
@@ -267,8 +268,6 @@ while run:
 
     #TwoD()
     ThreeD()
-    map.MiniMap()
-
 
 
     '''
