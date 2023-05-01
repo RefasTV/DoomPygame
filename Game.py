@@ -1,6 +1,11 @@
 #######Imports###############
 import pygame, math
 
+#### COLORS ####
+orange = (255,171,0)
+blue = (0,255,255)
+green = (0,255,128)
+white = (0,0,0)
 
 ########Variables############
 H = 1000 #Ширина
@@ -10,7 +15,7 @@ bullets = []
 clock = pygame.time.Clock()
 numRays = 101
 screen = pygame.display.set_mode((H,W))
-tile = 500
+tile = 400
 scaleX = H // numRays
 dist = numRays / (2 * math.tan(math.pi/3))
 FOV = math.pi / 3
@@ -85,6 +90,17 @@ class Map:
             [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
         ]
 
+        self.colorMap = [
+            [orange, orange,  orange,  orange,  orange,  orange,  orange,  orange, orange, orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     blue,    '_',    orange],
+            [orange, orange ,'_',      '_',     '_',     '_',     '_',     blue,    '_',    orange],
+            [white, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
+        ]
+
     def draw(self): # Draw 2D
         for j in range(W // 100):
             for i in range(H // 100):
@@ -93,15 +109,18 @@ class Map:
 
     def newDraw(self): # Draw 3D
         for curRay in range(numRays):
+            GHPx,GHPy = rays[curRay].GetHitPoint()
             proj_coff = dist * tile
-            depth = rays[curRay].GetDepth()
+            depth = rays[curRay].GetDepth() 
             proj_h = proj_coff / depth
-            c = depth*3
-            if (depth*3 < 0):
-                c = 0
-            elif depth*3 > 255:
-                c = 255
-            pygame.draw.rect(screen, [255 - c, 255 - c, 255-c],
+            depth *= math.cos(player.angle - rays[curRay].angle)
+            c1,c2,c3 = self.colorMap[int(GHPy//100)][int(GHPx//100)]
+            cDepth = depth
+            if (cDepth < 0):
+                cDepth = 0
+            elif cDepth > 255:
+                cDepth = 255
+            pygame.draw.rect(screen, [c1, c2, c3],   # Do depth
                             (scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
 
 
