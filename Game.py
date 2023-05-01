@@ -145,6 +145,14 @@ class Map:
                 c3 -= depth * 3
             pygame.draw.rect(screen, [c1, c2, c3],
                             (scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
+            
+        
+    def MiniMap(self):
+        for j in range(len(map.map)):
+            for i in range(len(map.map[0])):
+                if (self.map[j][i] == 1):
+                    pygame.draw.rect(screen,'darkgray',(i*10, j*10, 10, 10))
+        pygame.draw.circle(screen,'green',(player.posX/10, player.posY/10),3)
 
 
 class Player:
@@ -259,7 +267,7 @@ while run:
 
     #TwoD()
     ThreeD()
-
+    map.MiniMap()
 
 
 
