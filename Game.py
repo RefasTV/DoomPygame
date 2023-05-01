@@ -6,13 +6,14 @@ import pygame, math
 H = 1000 #Ширина
 W = 800 #Высота
 run = True
-#bullets = []
+bullets = []
 clock = pygame.time.Clock()
-numRays = 100
+numRays = 101
 screen = pygame.display.set_mode((H,W))
-tile = 1000
+tile = 500
 scaleX = H // numRays
-screen_dist = numRays / (2 * math.tan(math.pi/3))
+dist = numRays / (2 * math.tan(math.pi/3))
+deltaAngle = math.pi/3 / numRays        # FOV / numRays #
 
 ##########Run################
 pygame.init()
@@ -38,12 +39,12 @@ class Ray:
                 if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block:
                     return (i) # return depth
         return (10000000)
-        
+    
     def GetHitPoint(self):
         lenX = W * math.cos(self.angle) / 100 #Parts of rayX (1/100) Части лучаХ (поделили его на 100 маленьких частей)  player.posX +
         lenY = W * math.sin(self.angle) / 100 #Parts of rayY (1/100) player.posY +
 
-        for i in range(1,100): # Founding the point by multiplying it on i
+        for i in range(1,200): # Founding the point by multiplying it on i
             if (len(map.map) > (player.posY + lenY * i )// 100 >= 0 and len(map.map[0]) > (player.posX + lenX * i) // 100 >= 0): # can check next string?
                 if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block:
                     return (player.posX + lenX * i, player.posY + lenY* i) # return point
@@ -51,7 +52,7 @@ class Ray:
 
     def GetDistance(self):
         x,y = self.GetHitPoint()
-        return max(x - player.posX,y - player.posY)
+        return (x - player.posX,y - player.posY)
 
 
 
@@ -73,14 +74,14 @@ class Bullet:
 class Map:
     def __init__(self):
         self.map = [
-            [1, 1,  1,  1,  1,  1,  1,  1,  1, 1],
-            [1,'_','_','_','_','_','_','_','_',1],
-            [1,'_', 1, '_', 1,  1, '_', 1, '_',1],
-            [1,'_', 1, '_', 1,  1, '_','_','_',1],
-            [1,'_','_','_','_','_','_','_','_',1],
-            [1,'_', 1, '_', 1, '_', 1,  1, '_',1],
-            [1,'_', 1, '_', 1, '_','_', 1, '_',1],
-            [1, 1,  1,  1,  1,  1,  1,  1,  1, 1],
+            [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
+            [1,'_','_','_','_','_','_','_','_', 1],
+            [1,'_','_','_','_','_', '_','_','_',1],
+            [1,'_','_','_', 1,  1,  '_','_','_',1],
+            [1,'_','_','_', 1,  1,  '_','_','_',1],
+            [1,'_','_','_','_', '_','_', 1, '_',1],
+            [1, 1 ,'_', '_','_', '_','_', 1, '_',1],
+            [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
         ]
 
     def draw(self):
@@ -91,17 +92,16 @@ class Map:
 
     def newDraw(self):
         for curRay in range(numRays):
-            proj_coff = screen_dist * tile
-            depth = rays[curRay].GetDistance()
+            proj_coff = dist * tile
+            depth = rays[curRay].GetDepth()
             proj_h = proj_coff / depth
-            c = depth
-            if (depth < 0):
+            c = depth*3
+            if (depth*3 < 0):
                 c = 0
-            elif depth > 255:
+            elif depth*3 > 255:
                 c = 255
-            pygame.draw.rect(screen, [255-c, 255-c, 255-c],
-                            (scaleX * curRay, H / 2 - proj_h // 2, scaleX, proj_h))
-        
+            pygame.draw.rect(screen, [255 - c, 255 - c, 255-c],
+                            (scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
 
 
 class Player:
@@ -109,26 +109,30 @@ class Player:
         self.posX = 150
         self.posY = 150
         self.angle = 0
-        self.cameraSens = 0.0025
+        self.speed = 0.25
+        #self.cameraSens = 0.005
 
+    ##################### FIX #####################
     def movement(self):
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_s]):
-            self.posX += -0.25 * math.cos(self.angle)
-            self.posY += -0.25 * math.sin(self.angle)
+            self.posX += -self.speed * math.cos(self.angle)
+            self.posY += -self.speed * math.sin(self.angle)
         if (keys[pygame.K_w]):
-            self.posX += 0.25 * math.cos(self.angle) 
-            self.posY += 0.25 * math.sin(self.angle)
+            self.posX += self.speed * math.cos(self.angle) 
+            self.posY += self.speed * math.sin(self.angle)
         if (keys[pygame.K_a]):
-            self.posX += 0.25 * math.sin(self.angle) 
-            self.posY += -0.25 * math.cos(self.angle)
+            self.posX += self.speed * math.sin(self.angle) 
+            self.posY += -self.speed * math.cos(self.angle)
         if (keys[pygame.K_d]):
-            self.posX += -0.25 * math.sin(self.angle) 
-            self.posY += 0.25 * math.cos(self.angle)
+            self.posX += -self.speed * math.sin(self.angle) 
+            self.posY += self.speed * math.cos(self.angle)
+
+        # error up /\ #
         if (keys[pygame.K_LEFT]):
-            self.angle -= self.cameraSens
+            self.angle -= deltaAngle
         if (keys[pygame.K_RIGHT]):
-            self.angle += self.cameraSens
+            self.angle += deltaAngle
         self.angle %= math.tau
 
     def draw(self):
@@ -147,6 +151,16 @@ def DrawBullets():
     for i in range(len(bullets)):
         bullets[i].draw()
 """
+def TwoD():
+    map.draw()
+    player.draw()
+    for i in range(numRays):
+        rays[i].DrawRay()
+    #rays[-1].DrawRay()
+
+def ThreeD():
+    map.newDraw()
+
 
 ##########Class Objects##########
 player = Player()
@@ -156,7 +170,8 @@ rays = [0] * numRays
 ######### Game Loop##############
 while run:
     clock.tick(600)
-    for i in range(1,numRays+1):
+    print(player.angle)
+    for i in range(numRays):
         '''
         if (i == 0):
             rays[i] = Ray(player.angle - player.cameraSens * 20)
@@ -170,13 +185,13 @@ while run:
             rays[i] = Ray(player.angle + player.cameraSens * 20)
         '''
 
-
-        if i == numRays / 2:
-            rays[i-1] = Ray(player.angle)
+        ################ FIXED #######################  
+        if i == numRays / 2 - 0.5:
+            rays[i] = Ray(player.angle)
         if i < numRays / 2:
-            rays[i-1] = Ray(player.angle - player.cameraSens * (50 / 2 / i))
+            rays[i] = Ray(player.angle - deltaAngle * (numRays - i))
         if i > numRays / 2:
-            rays[i-1] = Ray(player.angle + player.cameraSens * (50 / 2 / (i % (numRays // 2) + 1)))
+            rays[i] = Ray(player.angle + deltaAngle * (i - numRays))
 
     pygame.display.set_caption(f'{clock.get_fps() : .1f}')
     for ev in pygame.event.get():
@@ -189,11 +204,16 @@ while run:
 
     #Game
     screen.fill((0,0,0))
-    #map.draw()
     player.movement()
-    #player.draw()
-    #rays[2].DrawRay()
-    map.newDraw()
+
+    #   SELECT    #
+
+    #TwoD()
+    ThreeD()
+
+
+
+
     '''
     DrawBullets()
     if (len(bullets) > 25): #Bullets Optimization
