@@ -13,7 +13,8 @@ screen = pygame.display.set_mode((H,W))
 tile = 500
 scaleX = H // numRays
 dist = numRays / (2 * math.tan(math.pi/3))
-deltaAngle = math.pi/3 / numRays        # FOV / numRays #
+FOV = math.pi / 3
+deltaAngle = FOV / numRays        # FOV / numRays
 
 ##########Run################
 pygame.init()
@@ -84,13 +85,13 @@ class Map:
             [1, 1,  1,  1,  1,  1,  1,  1,  1,  1],
         ]
 
-    def draw(self):
+    def draw(self): # Draw 2D
         for j in range(W // 100):
             for i in range(H // 100):
                 if (self.map[j][i] == 1):
                     pygame.draw.rect(screen,'darkgray',(i*100, j*100, 100, 100))
 
-    def newDraw(self):
+    def newDraw(self): # Draw 3D
         for curRay in range(numRays):
             proj_coff = dist * tile
             depth = rays[curRay].GetDepth()
@@ -110,9 +111,8 @@ class Player:
         self.posY = 150
         self.angle = 0
         self.speed = 0.25
-        #self.cameraSens = 0.005
+        self.cameraSens = 0.005
 
-    ##################### FIX #####################
     def movement(self):
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_s]):
@@ -128,11 +128,10 @@ class Player:
             self.posX += -self.speed * math.sin(self.angle) 
             self.posY += self.speed * math.cos(self.angle)
 
-        # error up /\ #
         if (keys[pygame.K_LEFT]):
-            self.angle -= deltaAngle
+            self.angle -= self.cameraSens
         if (keys[pygame.K_RIGHT]):
-            self.angle += deltaAngle
+            self.angle += self.cameraSens
         self.angle %= math.tau
 
     def draw(self):
@@ -170,7 +169,6 @@ rays = [0] * numRays
 ######### Game Loop##############
 while run:
     clock.tick(600)
-    print(player.angle)
     for i in range(numRays):
         '''
         if (i == 0):
@@ -185,13 +183,13 @@ while run:
             rays[i] = Ray(player.angle + player.cameraSens * 20)
         '''
 
-        ################ FIXED #######################  
+    ##################### FIX ##################### 
         if i == numRays / 2 - 0.5:
             rays[i] = Ray(player.angle)
         if i < numRays / 2:
-            rays[i] = Ray(player.angle - deltaAngle * (numRays - i))
+            rays[i] = Ray(player.angle - FOV/numRays * (numRays/2 - i))
         if i > numRays / 2:
-            rays[i] = Ray(player.angle + deltaAngle * (i - numRays))
+            rays[i] = Ray(player.angle + FOV/numRays * (i - numRays/2))
 
     pygame.display.set_caption(f'{clock.get_fps() : .1f}')
     for ev in pygame.event.get():
