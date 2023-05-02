@@ -11,7 +11,7 @@ white = (255,255,255)
 H = 1000 #Ширина
 W = 800 #Высота
 run = True
-bullets = []
+#bullets = []
 clock = pygame.time.Clock()
 numRays = 101
 screen = pygame.display.set_mode((H,W))
@@ -20,11 +20,27 @@ scaleX = H // numRays
 dist = numRays / (2 * math.tan(math.pi/3))
 FOV = math.pi / 3
 deltaAngle = FOV / numRays        # FOV / numRays
+pudge = pygame.image.load('pudge.png').convert_alpha() #download enemy pudge
 
-##########Run################
-pygame.init()
 
 ###########Classes###########
+class Enemy:
+    def __init__(self):
+        self.posX = 650
+        self.posY = 750
+        self.sprite = pudge
+        self.size = 50 # cube 50 x 50
+        self.baitDistance = 400
+        self.moveSlow = 100
+        #self.ray = Ray()
+
+    def MoveToPlayer(self):
+        if (abs(player.posX + player.posY - self.posX - self.posY) <= self.baitDistance):
+            self.posX, self.posY = self.posX + (player.posX - self.posX) / self.moveSlow, self.posY + (player.posY - self.posY) / self.moveSlow
+            print(self.posX, self.posY)
+
+
+
 class Ray:
     def __init__(self, angle):
         self.angle = angle
@@ -44,23 +60,43 @@ class Ray:
             if (len(map.map) > (player.posY + lenY * i )// 100 >= 0 and len(map.map[0]) > (player.posX + lenX * i) // 100 >= 0): # can check next string?
                 if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block:
                     return (i) # return depth
-        return (10000000)
+        return (200)
     
     def GetHitPoint(self):
-        lenX = W * math.cos(self.angle) / 100 #Parts of rayX (1/100) Части лучаХ (поделили его на 100 маленьких частей)  player.posX +
-        lenY = W * math.sin(self.angle) / 100 #Parts of rayY (1/100) player.posY +
+        EnemysPos = []
+        lenX = W * math.cos(self.angle) / 100 #Parts of rayX (1/100)
+        lenY = W * math.sin(self.angle) / 100 #Parts of rayY (1/100)
 
         for i in range(1,100): # Founding the point by multiplying it on i
-            if (len(map.map) > (player.posY + lenY * i )// 100 >= 0 and len(map.map[0]) > (player.posX + lenX * i) // 100 >= 0): # can check next string?
-                if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block:
-                    return (player.posX + lenX * i, player.posY + lenY* i) # return point
+            if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block
+                return (player.posX + lenX * i, player.posY + lenY* i) # return points
+            if ((int((player.posX + lenX * i) // 50),int((player.posY + lenY * i) // 50)) in EnemysPos): # if in enemy:
+                EnemysPos.remove((int((player.posX + lenX * i) // 50),int((player.posY + lenY * i) // 50)))
+                return (player.posX + lenX * i, player.posY + lenY* i) # return point
         return (0,0)
+    
+    def GetHitPointEnemy(self):
+        EnemysPos = []
+        lenX = W * math.cos(self.angle) / 100 #Parts of rayX (1/100)
+        lenY = W * math.sin(self.angle) / 100 #Parts of rayY (1/100)
+        for enem in enemyes:
+            EnemysPos.append((int(enem.posX // 50), int(enem.posY // 50)))
+
+        for i in range(1,100): # Founding the point by multiplying it on i
+            if (map.map[int((player.posY + lenY * i) // 100)][int((player.posX + lenX * i) // 100)] == 1): # if in block
+                return (0,0) # return points
+            if ((int((player.posX + lenX * i) // 50),int((player.posY + lenY * i) // 50)) in EnemysPos): # if in enemy:
+                EnemysPos.remove((int((player.posX + lenX * i) // 50),int((player.posY + lenY * i) // 50)))
+                return (player.posX + lenX * i, player.posY + lenY* i) # return point
+
+        return (0,0)
+
 
     def GetDistance(self):
         x,y = self.GetHitPoint()
         return (x - player.posX,y - player.posY)
 
-
+'''
 class Bullet:
     def __init__(self):
         self.angle = player.angle
@@ -73,7 +109,7 @@ class Bullet:
     def draw(self):
         if (W > self.curX > 0) and (H > self.curY > 0):
             pygame.draw.circle(screen,'white',self.nextPos(),3)
-
+'''
 
 class Map:
     def __init__(self):
@@ -99,20 +135,20 @@ class Map:
 
         self.colorMap = [
             [orange, orange,  orange,  orange,  orange,  orange,  orange,  orange, orange, orange],
-            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',      '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',      '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,    green,    '_',    '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     green,    green,    '_',    '_',     '_',    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
             [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
             [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
-            [orange, orange,orange,  orange,     '_',     '_',     '_',     green,  green,    orange],
+            [orange, orange,orange,  orange,     '_',     '_',     '_',   green,  green,    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   '_',      '_',    orange,     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   orange,   orange,   orange,     green,   green,     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     orange,     '_',     green,     '_',     '_',    orange],
+            [orange, '_',   orange,   orange,   orange,   green,   green,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     orange,    '_',     green,     '_',     '_',    orange],
             [orange, '_',   '_',      '_',     orange,     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   orange,      '_',     '_',     '_',     '_',     orange,     orange,    orange],
+            [orange, '_',  orange,  '_',     '_',     '_',     '_',     orange,     orange,    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
         ]
@@ -123,13 +159,15 @@ class Map:
                 if (self.map[j][i] == 1):
                     pygame.draw.rect(screen,'darkgray',(i*100, j*100, 100, 100))
 
-    def newDraw(self): # Draw 3D
+    def drawWalls(self):
         for curRay in range(numRays):
             GHPx,GHPy = rays[curRay].GetHitPoint()
             proj_coff = dist * tile
             depth = rays[curRay].GetDepth() 
             proj_h = proj_coff / depth
-            depth *= math.cos(player.angle - rays[curRay].angle)
+            depth *= math.cos(player.angle - rays[curRay].angle) # Remove Fisheye
+
+
             c1,c2,c3 = self.colorMap[int(GHPy//100)][int(GHPx//100)]
             if (c1 - depth*3 < 0):
                 c1 = 0
@@ -145,7 +183,17 @@ class Map:
                 c3 -= depth * 3
             pygame.draw.rect(screen, [c1, c2, c3],
                             (scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
-            
+
+    def drawEnemyes(self):
+        for curRay in range(numRays):
+            GHPx,GHPy = rays[curRay].GetHitPointEnemy()
+            if (GHPx,GHPy) != (0,0):
+                screen.blit(pudge, (0,0))#screen,(scaleX * curRay, W / 2 - proj_h // 2, scaleX, proj_h))
+
+
+    def newDraw(self): # Draw 3D
+        self.drawWalls()
+        self.drawEnemyes()
         
     def MiniMap(self):
         for j in range(len(map.map)):
@@ -225,9 +273,14 @@ def ThreeD():
 player = Player()
 map = Map()
 rays = [0] * numRays
+enemyes = [Enemy()]
+
+##########Run################
+pygame.init()
 
 ######### Game Loop##############
 while run:
+
     clock.tick(600)
     for i in range(numRays):
         '''
@@ -259,7 +312,9 @@ while run:
         if (ev.type == pygame.MOUSEBUTTONDOWN): #Shoot
             player.Shoot()
         """
-
+    for i in range(len(enemyes)):
+        enemyes[i].MoveToPlayer()
+    #print(player.posX, player.posY)
     #Game
     screen.fill((0,0,0))
     player.movement()
@@ -269,7 +324,7 @@ while run:
     #TwoD()
     ThreeD()
 
-
+    #screen.blit(pudge,(0,0))
     '''
     DrawBullets()
     if (len(bullets) > 25): #Bullets Optimization
