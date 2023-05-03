@@ -1,5 +1,5 @@
 #######Imports###############
-import pygame, math
+import pygame, math, random
 
 #### COLORS ####
 orange = (255,171,0)
@@ -56,27 +56,13 @@ class Ray:
                     return (player.posX + lenX * i, player.posY + lenY* i) # return point
         return (0,0)
 
-    def GetDistance(self):
-        x,y = self.GetHitPoint()
-        return (x - player.posX,y - player.posY)
-
-
-class Bullet:
-    def __init__(self):
-        self.angle = player.angle
-        self.curX = player.posX
-        self.curY = player.posY
-    def nextPos(self):
-        speed = 500
-        return (player.posX + (player.posX + W * math.cos(player.angle)) / speed, player.posY + (player.posY + W * math.sin(player.angle)) / speed)
-
-    def draw(self):
-        if (W > self.curX > 0) and (H > self.curY > 0):
-            pygame.draw.circle(screen,'white',self.nextPos(),3)
 
 
 class Map:
     def __init__(self):
+        self.prevX = 0
+        self.prevY = 0
+
         self.map = [
             [1, 1,  1,  1,  1,  1,    1,    1,  1,  1],
             [1,'pl','_','_','_','_',  '_', '_','_', 1],
@@ -88,9 +74,9 @@ class Map:
             [1,'_' ,'_', '_','_','_','_', 1,'_',1],
             [1, 1,  1,  1,'_','_', '_',  1,  1, 1],
             [1,'_','_','_','_','_', '_','_','_',1],
-            [1,'_','_','_',1,'_', '_',  '_','_',1],
-            [1,'_', 1,  1, 1,  1,  1,   '_','_',1],
-            [1,'_','_','_',1, '_', 1,   '_','_',1],
+            [1,'_','_','_','_','_', '_',  '_','_',1],
+            [1,'_', 1,  1, '_',  1,  1,   '_','_',1],
+            [1,'_','_','_','_', '_', 1,   '_','_',1],
             [1,'_','_','_',1, '_', '_', '_','_',1],
             [1,'_', 1 ,'_','_','_', '_', 1,  1,1],
             [1,'_','_','_','_','_', '_', '_','_',1],
@@ -101,21 +87,23 @@ class Map:
             [orange, orange,  orange,  orange,  orange,  orange,  orange,  orange, orange, orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     green,    green,    '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
-            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
-            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     green,    '_',    orange],
-            [orange, orange,orange,  orange,     '_',     '_',     '_',     green,  green,    orange],
+            [orange, '_',   '_',      '_',     orange, orange,    '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     orange, orange,    '_',     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     orange,    '_',    orange],
+            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     orange,    '_',    orange],
+            [orange, '_' ,  '_',      '_',     '_',     '_',     '_',     orange,    '_',    orange],
+            [orange, orange,orange,  orange,   '_',     '_',     '_',   orange,  orange,    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',    orange,     '_',     '_',     '_',     '_',    orange],
-            [orange, '_',   orange,   orange,   orange,     green,   green,     '_',     '_',    orange],
-            [orange, '_',   '_',      '_',     orange,     '_',     green,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
+            [orange, '_',   orange,   orange,  '_',    orange, orange,     '_',     '_',    orange],
+            [orange, '_',   '_',      '_',     '_',     '_',    orange,     '_',     '_',    orange],
             [orange, '_',   '_',      '_',     orange,     '_',     '_',     '_',     '_',    orange],
             [orange, '_',   orange,      '_',     '_',     '_',     '_',     orange,     orange,    orange],
             [orange, '_',   '_',      '_',     '_',     '_',     '_',     '_',     '_',    orange],
             [orange, orange, orange,   orange,  orange,  orange,  orange,  orange,  orange,  orange],
         ]
+
+        self.possibleSelect = []
 
     def draw(self): # Draw 2D
         for j in range(W // 100):
@@ -153,7 +141,19 @@ class Map:
                 if (self.map[j][i] == 1):
                     pygame.draw.rect(screen,'darkgray',(i*10, j*10, 10, 10))
         pygame.draw.circle(screen,'green',(player.posX/10, player.posY/10),3)
+    
+    def NewTarget(self):
+        self.GenerateList()
+        self.colorMap[self.prevY][self.prevX] = orange
+        self.prevX,self.prevY = random.choice(self.possibleSelect)
+        self.colorMap[self.prevY][self.prevX] = green
+        #print(self.colorMap)
 
+    def GenerateList(self):
+        for j in range(1,len(self.map)-1):
+            for i in range(1,len(self.map[0])-1):
+                if (self.map[j][i] == 1):
+                    self.possibleSelect.append((i,j))
 
 class Player:
     def __init__(self):
@@ -162,6 +162,7 @@ class Player:
         self.angle = 0
         self.speed = 0.5
         self.cameraSens = 0.005
+        self.points = 0
 
     def movement(self):
         keys = pygame.key.get_pressed()
@@ -192,15 +193,22 @@ class Player:
             self.angle += self.cameraSens
         self.angle %= math.tau
 
+        #print(player.posX,player.posY)
+
     def draw(self):
         pygame.draw.circle(screen,'green',(self.posX, self.posY),7)
 
-    
-"""
-    def Shoot(self):
-        bullets.append(Bullet())
-        print(bullets)
-"""
+    def shoot(self):
+        GHPx, GHPy = Ray(self.angle).GetHitPoint()
+        if (map.colorMap[int(GHPy // 100)][int(GHPx // 100)] == green): # if in colored block:
+            player.points += 1 
+            map.NewTarget()
+            print("Your points:", player.points)
+
+##########Class Objects##########
+player = Player()
+map = Map()
+rays = [0] * numRays
 
 ############Functions############
 """
@@ -208,6 +216,8 @@ def DrawBullets():
     for i in range(len(bullets)):
         bullets[i].draw()
 """
+map.NewTarget()
+
 
 def TwoD():
     map.draw()
@@ -220,11 +230,6 @@ def ThreeD():
     map.newDraw()
     map.MiniMap()
 
-
-##########Class Objects##########
-player = Player()
-map = Map()
-rays = [0] * numRays
 
 ######### Game Loop##############
 while run:
@@ -255,10 +260,9 @@ while run:
     for ev in pygame.event.get():
         if (ev.type == pygame.QUIT): #Quit
             run = False
-        """
+
         if (ev.type == pygame.MOUSEBUTTONDOWN): #Shoot
-            player.Shoot()
-        """
+            player.shoot()
 
     #Game
     screen.fill((0,0,0))
