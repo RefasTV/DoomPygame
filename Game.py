@@ -163,6 +163,7 @@ class Player:
         self.speed = 0.5
         self.cameraSens = 0.005
         self.points = 0
+        self.sensavity = 500
 
     def movement(self):
         keys = pygame.key.get_pressed()
@@ -184,16 +185,18 @@ class Player:
         if (map.map[int(self.posY // 100)] [int(self.posX // 100)] == 1):
             self.posX = prevX
             self.posY = prevY
-
-
-
+        '''
         if (keys[pygame.K_LEFT]):
             self.angle -= self.cameraSens
         if (keys[pygame.K_RIGHT]):
             self.angle += self.cameraSens
         self.angle %= math.tau
+        '''
 
-        #print(player.posX,player.posY)
+        mouseX = pygame.mouse.get_pos()[0]
+        mouseX = mouseX - W / 2
+        self.angle += mouseX / self.sensavity * self.cameraSens
+        self.angle %= math.tau
 
     def draw(self):
         pygame.draw.circle(screen,'green',(self.posX, self.posY),7)
@@ -208,17 +211,12 @@ class Player:
 ##########Class Objects##########
 player = Player()
 map = Map()
-rays = [0] * numRays
 
-############Functions############
-"""
-def DrawBullets():
-    for i in range(len(bullets)):
-        bullets[i].draw()
-"""
+###### MUST BE HERE #####
+rays = [0] * numRays
 map.NewTarget()
 
-
+############Functions############
 def TwoD():
     map.draw()
     player.draw()
@@ -235,20 +233,6 @@ def ThreeD():
 while run:
     clock.tick(600)
     for i in range(numRays):
-        '''
-        if (i == 0):
-            rays[i] = Ray(player.angle - player.cameraSens * 20)
-        if i == 1:
-            rays[i] = Ray(player.angle - player.cameraSens * 10)
-        if i == 2:
-            rays[i] = Ray(player.angle)
-        if i == 3:
-            rays[i] = Ray(player.angle + player.cameraSens * 10)
-        if i == 4:
-            rays[i] = Ray(player.angle + player.cameraSens * 20)
-        '''
-
-    ##################### FIX ##################### 
         if i == numRays / 2 - 0.5:
             rays[i] = Ray(player.angle)
         if i < numRays / 2:
@@ -260,8 +244,9 @@ while run:
     for ev in pygame.event.get():
         if (ev.type == pygame.QUIT): #Quit
             run = False
+        keys = pygame.key.get_pressed()
 
-        if (ev.type == pygame.MOUSEBUTTONDOWN): #Shoot
+        if (keys[pygame.K_SPACE]):#Shoot
             player.shoot()
 
     #Game
@@ -272,13 +257,6 @@ while run:
 
     #TwoD()
     ThreeD()
-
-
-    '''
-    DrawBullets()
-    if (len(bullets) > 25): #Bullets Optimization
-        bullets.pop(0)
-    '''
 
     #Update
     pygame.display.update()

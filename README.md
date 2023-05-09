@@ -1,1 +1,1 @@
-# DoomPygame
+# SplitGate On Pygame for UMSH school project
