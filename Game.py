@@ -1,6 +1,10 @@
 #######Imports###############
 import pygame, math, random
 
+##########Run################
+pygame.init()
+pygame.font.init()
+
 #### COLORS ####
 orange = (255,171,0)
 blue = (0,255,255)
@@ -20,9 +24,8 @@ scaleX = H // numRays
 dist = numRays / (2 * math.tan(math.pi/3))
 FOV = math.pi / 3
 deltaAngle = FOV / numRays        # FOV / numRays
-
-##########Run################
-pygame.init()
+isInMenu = False
+font = pygame.font.Font(None, 30)
 
 ###########Classes###########
 class Ray:
@@ -155,6 +158,14 @@ class Map:
                 if (self.map[j][i] == 1):
                     self.possibleSelect.append((i,j))
 
+    def PrintPoints(self):
+        text = font.render("Your points: " + str(player.points), True, (188,0,0))
+        screen.blit(text,(H - 200,50))
+
+class Menu:
+    def showMenu(self):
+        pygame.draw.rect(screen, orange, (H / 4, W / 4, H / 2, W / 2))
+
 class Player:
     def __init__(self):
         self.posX = 150
@@ -206,11 +217,12 @@ class Player:
         if (map.colorMap[int(GHPy // 100)][int(GHPx // 100)] == green): # if in colored block:
             player.points += 1 
             map.NewTarget()
-            print("Your points:", player.points)
+            #print("Your points:", player.points)
 
 ##########Class Objects##########
 player = Player()
 map = Map()
+menu = Menu()
 
 ###### MUST BE HERE #####
 rays = [0] * numRays
@@ -232,31 +244,40 @@ def ThreeD():
 ######### Game Loop##############
 while run:
     clock.tick(600)
-    for i in range(numRays):
-        if i == numRays / 2 - 0.5:
-            rays[i] = Ray(player.angle)
-        if i < numRays / 2:
-            rays[i] = Ray(player.angle - FOV/numRays * (numRays/2 - i))
-        if i > numRays / 2:
-            rays[i] = Ray(player.angle + FOV/numRays * (i - numRays/2))
 
-    pygame.display.set_caption(f'{clock.get_fps() : .1f}')
     for ev in pygame.event.get():
         if (ev.type == pygame.QUIT): #Quit
             run = False
+        if (ev.type == pygame.MOUSEBUTTONDOWN):
+            player.shoot()
         keys = pygame.key.get_pressed()
 
-        if (keys[pygame.K_SPACE]):#Shoot
-            player.shoot()
+        if (keys[pygame.K_ESCAPE]): # Menu
+            isInMenu = not isInMenu
 
-    #Game
-    screen.fill((0,0,0))
-    player.movement()
+    if not isInMenu:
+        for i in range(numRays):
+            if i == numRays / 2 - 0.5:
+                rays[i] = Ray(player.angle)
+            if i < numRays / 2:
+                rays[i] = Ray(player.angle - FOV/numRays * (numRays/2 - i))
+            if i > numRays / 2:
+                rays[i] = Ray(player.angle + FOV/numRays * (i - numRays/2))
 
-    #   SELECT    #
+        #Game
+        screen.fill((0,0,0))
+        player.movement()
 
-    #TwoD()
-    ThreeD()
+        #   SELECT    #
 
-    #Update
+        #TwoD()
+        ThreeD()
+        pygame.display.set_caption(f'{clock.get_fps() : .1f}')
+
+    if isInMenu:
+        menu.showMenu()
+
+    map.PrintPoints()
+
+        #Update
     pygame.display.update()
