@@ -28,6 +28,22 @@ isInMenu = False
 font = pygame.font.Font(None, 30)
 
 ###########Classes###########
+class Button:
+    def __init__(self,image,x,y,sizeX,sizeY):
+        self.image = image
+        self.x = x
+        self.y = y
+        self.sizeX = sizeX
+        self.sizeY = sizeY
+    
+    def press(self):
+        if (isInMenu):
+            if (self.x < pygame.mouse.get_pos[0] < self.x + self.sizeX):
+                if (self.y < pygame.mouse.get_pos[1] < self.y + self.sizeY):
+                    if (keys[pygame.K_KP_ENTER]):
+                        pass
+
+
 class Ray:
     def __init__(self, angle):
         self.angle = angle
@@ -163,8 +179,15 @@ class Map:
         screen.blit(text,(H - 200,50))
 
 class Menu:
+    def __init__(self):
+        #self.exit = Button()
+        #self.settings = Button()
+        #self.play = Button()
+        pass
+
     def showMenu(self):
         pygame.draw.rect(screen, orange, (H / 4, W / 4, H / 2, W / 2))
+        
 
 class Player:
     def __init__(self):
